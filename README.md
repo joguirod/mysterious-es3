@@ -13,3 +13,5 @@ A solução a ser desenvolvida deve ser capaz de permitir que clientes acessem o
 Vídeo: https://youtu.be/yA3iKh5baCE
 
 Documento de Briefing: https://docs.google.com/document/d/1v5YHP5hNBHix87eQlTdRwYBodEegupWB/edit?usp=sharing&ouid=111660117297245646265&rtpof=true&sd=true
+Documento de Pesquisa de Mercado: https://docs.google.com/document/d/1iiAbEflfipVILytLVvOMAi1C8OqnvCDaVN1-MdGqscA/edit?usp=sharing
+Visão de produto e Matriz é: https://docs.google.com/document/d/1lyM0q5uiwXPhj1P9OPNK6ReDSnJT0hezlKnJ-j6_xig/edit?tab=t.0
