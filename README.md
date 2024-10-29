@@ -1,6 +1,6 @@
 # mysterious-es3
 
-Equipe: Francisco Thiago e José Guilherme
+Equipe: Francisco Thiago, José Guilherme, Vitor Hugo
 
 Tema principal do projeto: Ecommerce
 
