@@ -10,10 +10,16 @@ Mysterious no mundo real: https://www.instagram.com/meu.mysterious/
 
 A solução a ser desenvolvida deve ser capaz de permitir que clientes acessem o catálogo de produtos Mysterious e possam comprá-los, também deve permitir ao gestor que possa controlar seus produtos, modificar preços, adicionar produtos novos, remover produtos e etc, além disso, o gestor deve ter acesso a relatórios sobre as vendas realizadas, como ticket médio e faturamento. Então encontram-se 3 principais funcionalidades nessa descrição: Catalogar e vender, gerenciar produtos e vendas, relatórios e indicadores de vendas.
 
-Vídeo: https://youtu.be/yA3iKh5baCE
+Vídeo de definições inicias: https://youtu.be/yA3iKh5baCE
 
 Documento de Briefing: https://docs.google.com/document/d/1v5YHP5hNBHix87eQlTdRwYBodEegupWB/edit?usp=sharing&ouid=111660117297245646265&rtpof=true&sd=true
 
 Documento de Pesquisa de Mercado: https://docs.google.com/document/d/1iiAbEflfipVILytLVvOMAi1C8OqnvCDaVN1-MdGqscA/edit?usp=sharing
 
 Visão de produto e Matriz é: https://docs.google.com/document/d/1lyM0q5uiwXPhj1P9OPNK6ReDSnJT0hezlKnJ-j6_xig/edit?tab=t.0
+
+Personas e Mapa de empatia: https://drive.google.com/file/d/1JMd0Uax1ilyDfbW7lkAvgQYOE6de5lrv/view?usp=sharing
+
+Caixa do produto: https://docs.google.com/document/d/1InUuzVgGImeSxpxM1i3_6gcsIWMuvYCQsXccuaub7GU/edit?tab=t.0#heading=h.gjdgxs
+
+Vídeo mostrando os artefatos até então: 
