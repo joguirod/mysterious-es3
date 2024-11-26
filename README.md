@@ -29,6 +29,8 @@ A solução a ser desenvolvida deve ser capaz de permitir que clientes acessem o
 
 [**Caixa do produto**](https://docs.google.com/document/d/1InUuzVgGImeSxpxM1i3_6gcsIWMuvYCQsXccuaub7GU/edit?tab=t.0#heading=h.gjdgxs)
 
+[**Fluxograma**](https://miro.com/app/board/uXjVL_no3mc=/?share_link_id=973795893793)
+
 Vídeo mostrando os artefatos até então: 
 
 ## Feedback para a equipe do projeto EiVizinho!:
