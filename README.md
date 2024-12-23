@@ -37,6 +37,8 @@ Vídeo mostrando os artefatos até então:
 
 Vídeo mostrando os principais pontos da atividade final da fase inception: 
 
+[**Sprint Backlog**](https://docs.google.com/spreadsheets/d/1jn_6d60jv8sqR4TKXGHz2pgKM3176fwcCRhDh0msxC8/edit?usp=sharing)
+
 ## Feedback para a equipe do projeto EiVizinho!:
 
  - O que mais se destaca do trabalho é a ideia em si, muito interessante
