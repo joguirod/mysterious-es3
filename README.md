@@ -39,7 +39,10 @@ Vídeo mostrando os principais pontos da atividade final da fase inception:
 
 [**Sprint Backlog**](https://docs.google.com/spreadsheets/d/1jn_6d60jv8sqR4TKXGHz2pgKM3176fwcCRhDh0msxC8/edit?usp=sharing)
 
-[**Modelo Relacional**](https://docs.google.com/spreadsheets/d/1jn_6d60jv8sqR4TKXGHz2pgKM3176fwcCRhDh0msxC8/edit?usp=sharing)
+[**Modelo Relacional**](https://lucid.app/lucidchart/f895a702-80ad-4454-8dde-fba9d58a49eb/edit?viewport_loc=-216%2C-734%2C2608%2C1149%2C0_0&invitationId=inv_929c8083-bb34-495f-8d26-6394e7293661)
+
+[**Mysterious Web - repositório**](https://github.com/joguirod/mysteriousapp-web)
+
 ## Feedback para a equipe do projeto EiVizinho!:
 
  - O que mais se destaca do trabalho é a ideia em si, muito interessante
