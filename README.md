@@ -43,6 +43,8 @@ Vídeo mostrando os principais pontos da atividade final da fase inception:
 
 [**Mysterious Web - repositório**](https://github.com/joguirod/mysteriousapp-web)
 
+[**Sprint 1 - Review**](https://docs.google.com/document/d/1qSOlixlQTX863YuDN1HEuCTAjXhfhSjU4LaMy5HUPRk/edit?tab=t.0#heading=h.fl30hkpwuo6h)
+
 ## Feedback para a equipe do projeto [**EiVizinho!:**](https://github.com/liviaalves00/Engenharia-de-Software-III)
 
  - O que mais se destaca do trabalho é a ideia em si, muito interessante
