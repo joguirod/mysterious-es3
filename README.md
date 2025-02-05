@@ -45,6 +45,10 @@ Vídeo mostrando os principais pontos da atividade final da fase inception:
 
 [**Sprint 1 - Review**](https://docs.google.com/document/d/1qSOlixlQTX863YuDN1HEuCTAjXhfhSjU4LaMy5HUPRk/edit?tab=t.0#heading=h.fl30hkpwuo6h)
 
+[**Sprint 3 - Vídeo comentando entrega**](https://youtu.be/IHoc6gzTN0I)
+
+OBS: o app está disponível no diretório mysterious-app\mysterious_app e a aplicação web está disponível em https://github.com/joguirod/mysteriousapp-web
+
 ## Feedback para a equipe do projeto [**EiVizinho!:**](https://github.com/liviaalves00/Engenharia-de-Software-III)
 
  - O que mais se destaca do trabalho é a ideia em si, muito interessante
