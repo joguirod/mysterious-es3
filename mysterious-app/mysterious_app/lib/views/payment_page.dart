@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:mysterious_app/models/OrderItem.dart';
+import 'package:mysterious_app/models/cart.dart';
+import 'package:mysterious_app/models/cartitem.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 class PaymentPage extends StatefulWidget {
-  final List<Map<String, dynamic>> cart;
+  final Cart cart;
 
   const PaymentPage({Key? key, required this.cart}) : super(key: key);
 
@@ -21,8 +24,8 @@ class _PaymentPageState extends State<PaymentPage> {
 
   double getTotalAmount() {
     double total = 0.0;
-    for (var item in widget.cart) {
-      total += item['preco'] * item['quantidade'];
+    for (var item in widget.cart.items) {
+      total += item.product.categoria.preco * item.quantidade;
     }
     return total;
   }
@@ -57,28 +60,50 @@ class _PaymentPageState extends State<PaymentPage> {
     await Printing.sharePdf(bytes: await pdf.save(), filename: 'boleto.pdf');
   }
 
+  Future<String?> criarItemPedido(Cartitem item,String id_pedido) async {
+    final response = await Supabase.instance.client.from('itempedido').insert([
+      {
+        'id_item_pedido': Uuid().v4(), // Gerar um UUID para o item do pedido
+        'id_pedido': id_pedido,
+        'id_categoria': item.product.categoria.id_categoria,
+        'id_genero': item.product.genero.id_genero,
+        'quantidade': item.quantidade,
+        'preco': item.product.categoria.preco,
+      }
+    ]).execute();
+
+    if (response.error != null) {
+      print('Erro ao criar item do pedido: ${response.error!.message}');
+      return null;
+    } else {
+      print('Item do pedido criado com sucesso!');
+      return response.data[0]['id_item_pedido'];
+    }
+  }
+
   Future<String?> criarPedido(String usuarioId, double valorTotal) async {
     final response = await Supabase.instance.client.from('pedido').insert([
       {
         'id_pedido': Uuid().v4(), // Gerar um UUID para o pedido
         'id_mysterious_user': usuarioId,
         'data_pedido': DateTime.now().toIso8601String(),
-        'data_finalizacao': DateTime.now().toIso8601String(),
-        'valor_total': valorTotal,
-        'id_categoria': widget.cart.isNotEmpty ? widget.cart[0]['categoria_id'] : null,
-        'id_genero': widget.cart.isNotEmpty ? widget.cart[0]['genero_id'] : null,
-        'descricao_categoria': widget.cart.isNotEmpty ? widget.cart[0]['categoria_descricao'] : null,
-        'descricao_genero': widget.cart.isNotEmpty ? widget.cart[0]['genero_descricao'] : null,
+        'valor_total': valorTotal
       }
     ]).execute();
 
-    if (response.error != null) {
-      print('Erro ao criar pedido: ${response.error!.message}');
+    if (response.error != null || response.data == null || response.data.isEmpty) {
+      print('Erro ao criar pedido: ${response.error?.message ?? 'Unknown error'}');
       return null;
-    } else {
-      print('Pedido criado com sucesso!');
-      return response.data[0]['id_pedido'];
     }
+
+    for (var item in widget.cart.items) {
+      final itemPedidoId = await criarItemPedido(item, response.data[0]['id_pedido']);
+      if (itemPedidoId == null) {
+        return null;
+      }
+    }
+
+    return response.data[0]['id_pedido'];
   }
 
   Future<void> _processPayment() async {
@@ -115,30 +140,6 @@ class _PaymentPageState extends State<PaymentPage> {
       return;
     }
 
-    
-    for (var item in widget.cart) {
-      final itemPedidoResponse = await Supabase.instance.client
-          .from('itempedido')
-          .insert({
-            'id_pedido': pedidoId,
-            'id_produto': item['id_produto'],
-            'quantidade': item['quantidade'],
-            'preco': item['preco'],
-            'id_categoria': item['categoria_id'],
-            'id_genero': item['genero_id'],
-          })
-          .execute();
-
-      if (itemPedidoResponse.error != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao adicionar item ao pedido: ${itemPedidoResponse.error!.message}')),
-          );
-        }
-        return;
-      }
-    }
-
     if (selectedPaymentMethod == 'boleto') {
       await _generateBoletoPdf();
     }
@@ -156,7 +157,7 @@ class _PaymentPageState extends State<PaymentPage> {
       );
     }
 
-    Future.delayed(const Duration(seconds: 10), () async {
+    Future.delayed(const Duration(seconds: 3), () async {
       if (mounted) {
         Navigator.of(context).pop(); 
       }

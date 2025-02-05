@@ -1,13 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mysterious_app/models/OrderItem.dart';
+import 'package:mysterious_app/models/cart.dart';
+import 'package:mysterious_app/models/cartitem.dart';
+import 'package:mysterious_app/models/category.dart';
+import 'package:mysterious_app/models/genre.dart';
+import 'package:mysterious_app/models/product.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'screens/cart_page.dart';
-import 'screens/login_page.dart';
-import 'screens/register_page.dart';
-import 'screens/user_page.dart';
-import 'screens/purchase_history_page.dart';
-import 'screens/settings_page.dart';
-import 'screens/order_details_page.dart';
+import 'views/cart_page.dart';
+import 'views/login_page.dart';
+import 'views/register_page.dart';
+import 'views/user_page.dart';
+import 'views/purchase_history_page.dart';
+import 'views/settings_page.dart';
+import 'views/order_details_page.dart';
 //import 'screens/catalogo_page.dart';
 
 void main() async {
@@ -15,8 +22,8 @@ void main() async {
 
 
   await Supabase.initialize(
-    url: 'https://localizaaicomedia.supabase.co',
-    anonKey: 'soalegria.inc', 
+    url: 'url',
+    anonKey: 'key', 
   );
 
   runApp(
@@ -42,13 +49,13 @@ class MyApp extends StatelessWidget {
             '/': (context) => const MyHomePage(title: 'E-commerce de Livros'),
             '/register': (context) => const RegisterPage(),
             '/user': (context) => const UserPage(),
-            '/login': (context) => LoginPage(cart: []), 
+            '/login': (context) => LoginPage(cart: new Cart(items: [])), 
             '/settings': (context) => const SettingsPage(),
             //'/catalogo': (context) => const CatalogoPage(), // Adicionei a rota do catálogo aqui
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/login') {
-              final cart = settings.arguments as List<Map<String, dynamic>>;
+              final cart = settings.arguments as Cart;
               return MaterialPageRoute(
                 builder: (context) {
                   return LoginPage(cart: cart);
@@ -73,13 +80,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Map<String, dynamic>> categoriaproduto = [];
-  List<Map<String, dynamic>> genero = [];
-  List<Map<String, dynamic>> filteredCategories = [];
-  List<Map<String, dynamic>> filteredGenres = [];
-  List<Map<String, dynamic>> cart = [];
+  List<CategoryProduct> categoriaproduto = [];
+  List<Genre> genero = [];
+  List<CategoryProduct> filteredCategories = [];
+  List<Genre> filteredGenres = [];
+  Cart cart = new Cart(items: []);
   int? selectedCategoryId;
-  String? selectedGenre;
+  Genre? selectedGenre;
   double? selectedCategoryPrice;
   String? selectedCategoryImageUrl;
   TextEditingController searchController = TextEditingController();
@@ -113,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       filteredCategories = categoriaproduto
           .where((category) =>
-              category['descricao']!.toLowerCase().contains(searchController.text.toLowerCase()))
+              category.descricao.toLowerCase().contains(searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -122,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       filteredGenres = genero
           .where((genre) =>
-              genre['descricao']!.toLowerCase().contains(searchController.text.toLowerCase()))
+              genre.descricao.toLowerCase().contains(searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -130,18 +137,19 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchCategories() async {
     final categoryResponse = await Supabase.instance.client
         .from('categoriaproduto')
-        .select('id_categoria, descricao, preco, imagem_url') 
+        .select('id_categoria, descricao, preco, quantidade_disponivel, imagem_url') 
         .execute();
 
     if (categoryResponse.error == null) {
       setState(() {
         categoriaproduto = (categoryResponse.data as List)
-            .map((e) => {
-                  'id_categoria': e['id_categoria'] as int,
-                  'descricao': e['descricao'] as String,
-                  'imagem_url': e['imagem_url'] as String, 
-                  'preco': e['preco']
-                })
+            .map((e) => CategoryProduct(
+                  id_categoria: e['id_categoria'] as int,
+                  descricao: e['descricao'] as String,
+                  imagem_url: e['imagem_url'] as String,
+                  quantidade: e['quantidade_disponivel'] as int, 
+                  preco: e['preco'] as double, 
+                ))
             .toList();
         filteredCategories = categoriaproduto;
       });
@@ -154,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchGenres(int categoryId) async {
     final genreResponse = await Supabase.instance.client
         .from('genero')
-        .select('descricao, imagem_url') 
+        .select('id_genero, quantidade_disponivel, descricao, imagem_url') 
         .eq('id_categoria', categoryId) 
         .limit(10)
         .execute();
@@ -162,10 +170,12 @@ class _MyHomePageState extends State<MyHomePage> {
     if (genreResponse.error == null) {
       setState(() {
         genero = (genreResponse.data as List)
-            .map((e) => {
-                  'descricao': e['descricao'] as String,
-                  'imagem_url': e['imagem_url'] as String 
-                })
+            .map((e) => Genre(
+                  id_genero: e['id_genero'] as int,
+                  quantidade_disponivel: e['quantidade_disponivel'] as int,
+                  descricao: e['descricao'] as String,
+                  imagem_url: e['imagem_url'] as String,
+                ))
             .toList();
         filteredGenres = genero;
       });
@@ -197,12 +207,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void addToCart(Map<String, dynamic> item) {
+  void addToCart(Product item, int quantidade) {
     setState(() {
-      cart.add(item);
+      cart.items.add(new Cartitem(product: item, quantidade: quantidade));
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${item['descricao']} adicionado ao carrinho')),
+      SnackBar(content: Text('${item.categoria.descricao} adicionado ao carrinho')),
     );
   }
 
@@ -261,7 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   },
                 ),
-                if (cart.isNotEmpty)
+                if (cart.items.isNotEmpty)
                   Positioned(
                     right: 0,
                     child: Container(
@@ -275,7 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         minHeight: 18,
                       ),
                       child: Text(
-                        '${cart.length}',
+                        '${cart.items.length}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -370,13 +380,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          selectedCategoryId = categoria['id_categoria'];
-                          selectedCategoryPrice = categoria['preco'];
-                          selectedCategoryImageUrl = categoria['imagem_url'];
-                          fetchGenres(categoria['id_categoria']);
+                          selectedCategoryId = categoria.id_categoria;
+                          selectedCategoryPrice = categoria.preco;
+                          selectedCategoryImageUrl = categoria.imagem_url;
+                          fetchGenres(categoria.id_categoria);
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Categoria ${categoria['descricao']} selecionada')),
+                          SnackBar(content: Text('Categoria ${categoria.descricao} selecionada')),
                         );
                       },
                       child: Container(
@@ -396,7 +406,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.network(
-                              categoria['imagem_url']!,
+                              categoria.imagem_url!,
                               height: 100, 
                               width: 100, 
                               errorBuilder: (context, error, stackTrace) {
@@ -405,7 +415,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              categoria['descricao']!,
+                              categoria.descricao!,
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                               textAlign: TextAlign.center,
                             ),
@@ -454,10 +464,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          selectedGenre = genre['descricao'];
+                          selectedGenre = genre;
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Gênero ${genre['descricao']} selecionado')),
+                          SnackBar(content: Text('Gênero ${genre.descricao} selecionado')),
                         );
                       },
                       child: Container(
@@ -477,7 +487,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.network(
-                              genre['imagem_url']!,
+                              genre.imagem_url!,
                               height: 110, 
                               width: 110, 
                               errorBuilder: (context, error, stackTrace) {
@@ -486,7 +496,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              genre['descricao']!,
+                              genre.descricao!,
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                               textAlign: TextAlign.center,
                             ),
@@ -532,7 +542,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Gênero: $selectedGenre',
+                        'Gênero: ${selectedGenre!.descricao}',
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -543,13 +553,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        addToCart({
-                          'produto_id': selectedGenre, 
-                          'categoria_id': selectedCategoryId, 
-                          'quantidade': 1,
-                          'preco': selectedCategoryPrice,
-                          'imagem_url': selectedCategoryImageUrl, 
-                        });
+                        addToCart(
+                          Product.namedConstructor(
+                            categoria: CategoryProduct.withId(id_categoria: selectedCategoryId!, preco: selectedCategoryPrice!),
+                            genero: Genre.withId(id_genero: selectedGenre!.id_genero),
+                          ),
+                          1,
+                        );
                       },
                       child: const Text('Adicionar ao Carrinho'),
                     ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mysterious_app/models/cart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'cart_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
-  final List<Map<String, dynamic>> cart;
+  final Cart cart;
 
   const LoginPage({Key? key, required this.cart}) : super(key: key);
 

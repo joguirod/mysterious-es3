@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mysterious_app/models/cart.dart';
 import 'payment_page.dart';
 import 'login_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CartPage extends StatefulWidget {
-  final List<Map<String, dynamic>> cart;
+  final Cart cart;
 
   const CartPage({Key? key, required this.cart}) : super(key: key);
 
@@ -15,12 +16,12 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   void removeFromCart(int index) {
     setState(() {
-      widget.cart.removeAt(index);
+      widget.cart.items.removeAt(index);
     });
   }
 
   void _finalizePurchase() {
-    if (widget.cart.isEmpty) {
+    if (widget.cart.items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Você deve colocar algum item para finalizar a compra')),
       );
@@ -49,7 +50,7 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
-    double totalAmount = widget.cart.fold(0, (sum, item) => sum + item['preco'] * item['quantidade']);
+    double totalAmount = widget.cart.items.fold(0, (sum, item) => sum + item.product.categoria.preco * item.quantidade);
 
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +64,7 @@ class _CartPageState extends State<CartPage> {
           ),
         ],
       ),
-      body: widget.cart.isEmpty
+      body: widget.cart.items.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -105,27 +106,27 @@ class _CartPageState extends State<CartPage> {
                         ],
                       ),
                       child: ListView.builder(
-                        itemCount: widget.cart.length,
+                        itemCount: widget.cart.items.length,
                         itemBuilder: (context, index) {
-                          final item = widget.cart[index];
+                          final item = widget.cart.items[index];
                           return Card(
                             margin: const EdgeInsets.all(8.0),
                             child: ListTile(
                               leading: Image.network(
-                                item['imagem_url'],
+                                item.product.categoria.imagem_url,
                                 height: 50,
                                 width: 50,
                                 errorBuilder: (context, error, stackTrace) {
                                   return const Icon(Icons.error);
                                 },
                               ),
-                              title: Text('Produto ID: ${item['produto_id']}'),
+                              title: Text('Produto ID: ${item.product.id_produto}'),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Categoria ID: ${item['categoria_id']}'),
-                                  Text('Quantidade: ${item['quantidade']}'),
-                                  Text('Preço: R\$ ${item['preco'].toStringAsFixed(2)}'),
+                                  Text('Categoria ID: ${item.product.categoria.id_categoria}'),
+                                  Text('Quantidade: ${item.quantidade}'),
+                                  Text('Preço: R\$ ${item.product.categoria.preco.toStringAsFixed(2)}'),
                                 ],
                               ),
                               trailing: IconButton(
