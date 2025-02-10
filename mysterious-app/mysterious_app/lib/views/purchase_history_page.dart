@@ -39,7 +39,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
           orders.add({
             'id_pedido': e['id_pedido'],
             'data_pedido': e['data_pedido'],
-            'data_finalizacao': e['data_finalizacao'] ?? '',
+            'data_finalizacao': e['data_finalizacao'] ?? '-',
             'id_mysterious_user': e['id_mysterious_user'] ?? '',
             'valor_total': e['valor_total'],
           });
@@ -93,6 +93,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
               children: [
                 Text('Data: ${purchase['data_pedido']}'),
                 Text('Valor: R\$ ${purchase['valor_total']}'),
+                Text('Data finalização: ${purchase['data_finalizacao']}'),
               ],
             ),
             onTap: () {

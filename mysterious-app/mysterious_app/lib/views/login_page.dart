@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mysterious_app/controllers/UserController.dart';
 import 'package:mysterious_app/models/cart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'cart_page.dart';
@@ -17,43 +18,24 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final ValueNotifier<bool> _isPasswordVisible = ValueNotifier<bool>(false);
+  final UserController userController = UserController();
 
   Future<void> _login() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-
+    // Verificar se o usuário está autenticado
     try {
-      final response = await Supabase.instance.client.auth.signIn(
-        email: email,
-        password: password,
-      );
-
-      if (response.error != null) {
-        if (response.error!.message.contains('Email not confirmed')) {
-          // E-mail não confirmado
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Por favor, confirme seu e-mail antes de fazer login.')),
-          );
-        } else {
-          // Outro erro
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro: ${response.error!.message}')),
-          );
-        }
+      final session = await userController.login(email, password);
+      if (session != null) {
+        print('Usuário autenticado: ${session.user!.email}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login bem-sucedido!')),
+        );
+        Navigator.pushReplacementNamed(context, '/');
       } else {
-        // Verificar se o usuário está autenticado
-        final session = Supabase.instance.client.auth.currentSession;
-        if (session != null) {
-          print('Usuário autenticado: ${session.user!.email}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login bem-sucedido!')),
-          );
-          Navigator.pushReplacementNamed(context, '/');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Falha na autenticação')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Falha na autenticação')),
+        );
       }
     } catch (e) {
       print('Erro ao realizar login: $e');

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mysterious_app/controllers/CategoryController.dart';
+import 'package:mysterious_app/controllers/GenreController.dart';
+import 'package:mysterious_app/controllers/UserController.dart';
 import 'package:mysterious_app/models/OrderItem.dart';
 import 'package:mysterious_app/models/cart.dart';
 import 'package:mysterious_app/models/cartitem.dart';
@@ -20,10 +23,9 @@ import 'views/order_details_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
   await Supabase.initialize(
-    url: 'url',
-    anonKey: 'key', 
+    url: 'https://jewpsxpzwgkzbjghxwes.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impld3BzeHB6d2dremJqZ2h4d2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzczNDkxNjYsImV4cCI6MjA1MjkyNTE2Nn0.yW_ISgMXvDyugU6PZpniU-LXcvhEFc5ED0IesGKPAk0', 
   );
 
   runApp(
@@ -42,6 +44,7 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeNotifier>(
       builder: (context, theme, child) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'E-commerce de Livros',
           theme: theme.isDarkMode ? ThemeData.dark() : ThemeData.light(),
           initialRoute: '/',
@@ -80,9 +83,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<CategoryProduct> categoriaproduto = [];
-  List<Genre> genero = [];
+  final CategoryController categoryController = CategoryController();
+  final GenreController genreController = GenreController();
+  final UserController userController = UserController();
+  List<CategoryProduct> categories = [];
   List<CategoryProduct> filteredCategories = [];
+  List<Genre> genres = [];
   List<Genre> filteredGenres = [];
   Cart cart = new Cart(items: []);
   int? selectedCategoryId;
@@ -96,8 +102,18 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    fetchCategories();
-    fetchUserName();
+    categoryController.fetchCategories().then((categories) {
+      setState(() {
+        this.categories = categories;
+        filteredCategories = categories;
+      });
+    });
+    userController.fetchUserName().then((user) {
+      setState(() {
+        userName = user['username'];
+        userEmail = user['email'];
+      });
+    });
     searchController.addListener(_onSearchChanged);
   }
 
@@ -109,102 +125,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onSearchChanged() {
-    if (selectedCategoryId == null) {
-      filterCategories();
-    } else if (selectedGenre == null) {
-      filterGenres();
-    }
+    filterCategories();
+    filterGenres();
   }
 
   void filterCategories() {
     setState(() {
-      filteredCategories = categoriaproduto
-          .where((category) =>
-              category.descricao.toLowerCase().contains(searchController.text.toLowerCase()))
-          .toList();
+      filteredCategories = categories.where((category) {
+        return category.descricao!.toLowerCase().contains(searchController.text.toLowerCase());
+      }).toList();
     });
   }
 
   void filterGenres() {
     setState(() {
-      filteredGenres = genero
-          .where((genre) =>
-              genre.descricao.toLowerCase().contains(searchController.text.toLowerCase()))
-          .toList();
+      filteredGenres = genres.where((genre) {
+        return genre.descricao!.toLowerCase().contains(searchController.text.toLowerCase());
+      }).toList();
     });
-  }
-
-  Future<void> fetchCategories() async {
-    final categoryResponse = await Supabase.instance.client
-        .from('categoriaproduto')
-        .select('id_categoria, descricao, preco, quantidade_disponivel, imagem_url') 
-        .execute();
-
-    if (categoryResponse.error == null) {
-      setState(() {
-        categoriaproduto = (categoryResponse.data as List)
-            .map((e) => CategoryProduct(
-                  id_categoria: e['id_categoria'] as int,
-                  descricao: e['descricao'] as String,
-                  imagem_url: e['imagem_url'] as String,
-                  quantidade: e['quantidade_disponivel'] as int, 
-                  preco: e['preco'] as double, 
-                ))
-            .toList();
-        filteredCategories = categoriaproduto;
-      });
-    } else {
-      print('Category fetch error: ${categoryResponse.error?.message}');
-      print('Category fetch response: ${categoryResponse.data}');
-    }
-  }
-
-  Future<void> fetchGenres(int categoryId) async {
-    final genreResponse = await Supabase.instance.client
-        .from('genero')
-        .select('id_genero, quantidade_disponivel, descricao, imagem_url') 
-        .eq('id_categoria', categoryId) 
-        .limit(10)
-        .execute();
-
-    if (genreResponse.error == null) {
-      setState(() {
-        genero = (genreResponse.data as List)
-            .map((e) => Genre(
-                  id_genero: e['id_genero'] as int,
-                  quantidade_disponivel: e['quantidade_disponivel'] as int,
-                  descricao: e['descricao'] as String,
-                  imagem_url: e['imagem_url'] as String,
-                ))
-            .toList();
-        filteredGenres = genero;
-      });
-    } else {
-      print('Genre fetch error: ${genreResponse.error?.message}');
-      print('Genre fetch response: ${genreResponse.data}');
-    }
-  }
-
-  Future<void> fetchUserName() async {
-    final session = Supabase.instance.client.auth.currentSession;
-    if (session != null) {
-      final userId = session.user!.id;
-      final response = await Supabase.instance.client
-          .from('mysterioususer')
-          .select('username, email')
-          .eq('id_mysterious_user', userId)
-          .single()
-          .execute();
-
-      if (response.error == null && response.data != null) {
-        setState(() {
-          userName = response.data['username'];
-          userEmail = response.data['email'];
-        });
-      } else {
-        print('Erro ao buscar nome do usuário: ${response.error?.message}');
-      }
-    }
   }
 
   void addToCart(Product item, int quantidade) {
@@ -383,7 +321,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           selectedCategoryId = categoria.id_categoria;
                           selectedCategoryPrice = categoria.preco;
                           selectedCategoryImageUrl = categoria.imagem_url;
-                          fetchGenres(categoria.id_categoria);
+                          genreController.fetchGenres(categoria.id_categoria).then((genres) {
+                            setState(() {
+                              this.genres = genres;
+                              filteredGenres = genres;
+                            });
+                          });
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Categoria ${categoria.descricao} selecionada')),
